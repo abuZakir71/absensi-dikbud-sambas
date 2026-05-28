@@ -225,6 +225,7 @@
                 </div>
             </div>
 
+            <!-- Radar Map -->
             <div class="space-y-2">
                 <div class="flex justify-between items-end">
                     <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wider"><i class="fa-solid fa-map-location-dot text-brand-500 mr-2"></i> Radar Lokasi</h3>
@@ -233,11 +234,13 @@
                 <div id="map" class="shadow-inner border border-slate-200"></div>
             </div>
 
+            <!-- Kamera & Face Detection Container -->
             <div class="space-y-2">
                 <div class="flex justify-between items-end">
                     <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wider"><i class="fa-solid fa-camera text-brand-500 mr-2"></i> Face Detection</h3>
-                    <span id="faceBadge" class="text-xs font-bold px-2 py-1 rounded-full bg-red-100 text-red-600"><i class="fa-solid fa-spinner fa-spin mr-1"></i> Mendeteksi Wajah</span>
+                    <span id="faceBadge" class="text-xs font-bold px-2 py-1 rounded-full bg-sky-100 text-sky-700"><i class="fa-solid fa-video mr-1"></i> Kamera Bersiap</span>
                 </div>
+                
                 <div id="camera-container" class="shadow-inner border border-slate-200 relative">
                     <video id="videoElement" autoplay playsinline muted></video>
                     <img id="fallbackImageDisplay" class="hidden w-full h-full object-cover transform scale-x-[-1]" />
@@ -245,8 +248,15 @@
                     <div id="cameraLoading" class="absolute inset-0 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm z-30 text-white flex-col"></div>
                     <input type="file" id="iosCameraInput" accept="image/*" capture="user" class="hidden" onchange="handleIOSCamera(event)">
                 </div>
+
+                <!-- ZETTBOT REVISI: Tombol Rana Manual "Ambil Foto" (Capture & Evaluasi AI Instant) -->
+                <button id="btnCapture" onclick="triggerManualShutter()" class="w-full bg-brand-600 hover:bg-brand-500 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-brand-600/30 transition-all active:scale-95 flex items-center justify-center gap-2 mt-2">
+                    <i class="fa-solid fa-camera"></i>
+                    <span>Ambil Foto & Absen</span>
+                </button>
             </div>
 
+            <!-- Footer Action Buttons (Tombol absen tidak dikunci oleh AI secara real-time lagi) -->
             <div class="grid grid-cols-2 gap-4 pt-2">
                 <button id="btnMasuk" onclick="prosesAbsen('Masuk')" disabled class="disabled:opacity-50 disabled:cursor-not-allowed bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-4 rounded-xl shadow-lg shadow-emerald-500/30 transition-all active:scale-95 flex flex-col items-center justify-center gap-1">
                     <i class="fa-solid fa-right-to-bracket text-xl"></i>
@@ -270,19 +280,12 @@
         // ============================================================================
         // ZETTBOT SECURE WEB CONNECTION CONFIGURATION
         // ============================================================================
-        // Masukkan URL Google Apps Script Web App Anda setelah di-deploy sebagai Web App
         const GAS_API_URL = "https://script.google.com/macros/s/AKfycbwB-vRXDOeZN67vt4J2WVvN1f5SBqsLe2jjDDq3mGo4cH8h087MTzpmHg4v2HDa2LSF/exec"; 
 
-        /**
-         * Pengirim request REST API ke Google Apps Script secara aman.
-         * Menggunakan bypass CORS di sisi GAS dengan content-type text/plain.
-         */
         async function callGAS(action, payload = {}) {
             let apiUrl = GAS_API_URL || localStorage.getItem('zett_gas_api_url');
             
-            // Jika API URL belum ditentukan, minta pengguna mengisinya (UX ramah pemula)
             if (!apiUrl) {
-                // ZETTBOT FIX: Tutup paksa modal loading aktif sebelumnya agar tombol konfirmasi muncul normal
                 Swal.close(); 
                 
                 const { value: url } = await Swal.fire({
@@ -305,12 +308,11 @@
             }
 
             try {
-                // Fetch request dengan penanganan redirect otomatis Google Apps Script
                 const response = await fetch(apiUrl, {
                     method: 'POST',
                     redirect: 'follow',
                     headers: {
-                        'Content-Type': 'text/plain;charset=utf-8' // Menghindari CORS pre-flight pre-check block
+                        'Content-Type': 'text/plain;charset=utf-8'
                     },
                     body: JSON.stringify({ action: action, payload: payload })
                 });
@@ -371,10 +373,11 @@
         let systemSettings = null; 
         let map, userMarker, homeCircle, homeMarker;
         let currentLat = 0, currentLong = 0, distanceToHome = 9999;
+        
+        // State deteksi wajah & validasi lokasi
         let isFaceDetected = false;
         let isLocationValid = false;
         let stream = null;
-        let faceDetectionInterval;
         const RADIUS_METER = 200; 
         
         let fallbackBase64 = null;
@@ -584,10 +587,10 @@
                         lanjutkanLoginNormal(id);
                     }
                 })
-                .catch(e => { lanjutkanLoginNormal(id); });
+                .catch(e => { lanjutanLoginNormal(id); });
         }
 
-        function lanjutkanLoginNormal(id) {
+        function lanjutanLoginNormal(id) {
             Swal.fire({ title: 'Verifikasi Data', html: 'Mencari data pegawai...', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); }});
 
             callGAS('getPegawaiData', { idPegawai: id, deviceToken: getDeviceToken() })
@@ -623,21 +626,26 @@
 
         function logout() {
             if(stream) stream.getTracks().forEach(track => track.stop());
-            if(faceDetectionInterval) clearInterval(faceDetectionInterval);
             
             fallbackBase64 = null;
             document.getElementById('fallbackImageDisplay').classList.add('hidden');
             document.getElementById('fallbackImageDisplay').src = '';
             document.getElementById('videoElement').classList.remove('hidden');
             document.getElementById('camera-container').style.borderColor = "#e2e8f0";
-            document.getElementById('faceBadge').className = "text-xs font-bold px-2 py-1 rounded-full bg-red-100 text-red-600";
-            document.getElementById('faceBadge').innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-1"></i> Mendeteksi Wajah`;
+            
+            // Kembalikan badge status ke keadaan semula
+            document.getElementById('faceBadge').className = "text-xs font-bold px-2 py-1 rounded-full bg-sky-100 text-sky-700";
+            document.getElementById('faceBadge').innerHTML = `<i class="fa-solid fa-video mr-1"></i> Kamera Bersiap`;
 
             document.getElementById('dashboardScreen').classList.add('hidden');
             document.getElementById('loginScreen').classList.remove('hidden');
             document.getElementById('inputIdPegawai').value = '';
-            currentUser = null; systemSettings = null;
-            isLocationValid = false; isFaceDetected = false;
+            
+            currentUser = null; 
+            systemSettings = null;
+            isLocationValid = false; 
+            isFaceDetected = false;
+            
             validateAbsenButton(); 
         }
 
@@ -744,51 +752,30 @@
                 .catch(err => Swal.fire('Error', err.message, 'error'));
         }
 
+        // ZETTBOT REVISI: Menginisialisasi Kamera dalam mode pratinjau pasif (Tanpa interval deteksi berkelanjutan untuk menghilangkan lag)
         async function initCameraAndFaceAPI() {
             const video = document.getElementById('videoElement');
-            const overlay = document.getElementById('overlay');
             const loadingUI = document.getElementById('cameraLoading');
             
             loadingUI.classList.remove('hidden');
-            loadingUI.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin text-3xl mb-2 text-brand-400"></i><p class="text-sm font-medium">Memuat Kamera & AI Model...</p>`;
+            loadingUI.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin text-3xl mb-2 text-brand-400"></i><p class="text-sm font-medium">Memasangkan Kamera & Model AI...</p>`;
             
             try {
                 stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" }, audio: false });
                 video.srcObject = stream;
                 video.play().catch(e => { console.warn("Autoplay terblokir:", e); });
                 
+                // Load bobot jaringan syaraf deteksi wajah tinyFace
                 const MODEL_URL = 'https://cdn.jsdelivr.net/gh/justadudewhohacks/face-api.js@master/weights';
                 await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
                 
                 loadingUI.classList.add('hidden'); 
 
-                video.addEventListener('play', () => {
-                    const displaySize = { width: video.videoWidth, height: video.videoHeight };
-                    faceapi.matchDimensions(overlay, displaySize);
-                    
-                    faceDetectionInterval = setInterval(async () => {
-                        if (video.paused || video.ended || !video.videoWidth) return;
-                        
-                        const detections = await faceapi.detectAllFaces(video, new faceapi.TinyFaceDetectorOptions());
-                        const resizedDetections = faceapi.resizeResults(detections, displaySize);
-                        
-                        overlay.getContext('2d').clearRect(0, 0, overlay.width, overlay.height);
-                        
-                        const badgeFace = document.getElementById('faceBadge');
-                        if(detections.length > 0) {
-                            isFaceDetected = true;
-                            badgeFace.className = "text-xs font-bold px-2 py-1 rounded-full bg-emerald-100 text-emerald-700";
-                            badgeFace.innerHTML = `<i class="fa-solid fa-face-smile mr-1"></i> Wajah Terdeteksi`;
-                            document.getElementById('camera-container').style.borderColor = "#10b981"; 
-                        } else {
-                            isFaceDetected = false;
-                            badgeFace.className = "text-xs font-bold px-2 py-1 rounded-full bg-red-100 text-red-600";
-                            badgeFace.innerHTML = `<i class="fa-solid fa-user-xmark mr-1"></i> Wajah Tidak Ditemukan`;
-                            document.getElementById('camera-container').style.borderColor = "#ef4444";
-                        }
-                        validateAbsenButton();
-                    }, 500);
-                });
+                // Set status kamera siap menggunakan rana manual
+                const badgeFace = document.getElementById('faceBadge');
+                badgeFace.className = "text-xs font-bold px-2 py-1 rounded-full bg-sky-100 text-sky-700";
+                badgeFace.innerHTML = `<i class="fa-solid fa-video mr-1"></i> Kamera Siap (Rana Manual)`;
+                document.getElementById('camera-container').style.borderColor = "#0ea5e9";
 
             } catch (err) {
                 loadingUI.innerHTML = `
@@ -799,15 +786,22 @@
             }
         }
 
+        // ZETTBOT REVISI: Penanganan Kamera iOS Fallback (Evaluasi AI on-demand saat file foto selesai diunggah)
         async function handleIOSCamera(event) {
             const file = event.target.files[0];
             if (!file) return;
 
             event.target.value = '';
 
+            const activeTipe = getActiveTipeAbsen();
+            if (!activeTipe) {
+                Swal.fire('Waktu Habis', 'Belum memasuki waktu absen atau Anda telah menyelesaikan absensi hari ini.', 'warning');
+                return;
+            }
+
             const loadingUI = document.getElementById('cameraLoading');
             loadingUI.classList.remove('hidden');
-            loadingUI.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin text-3xl mb-2 text-brand-400"></i><p class="text-sm font-medium">Menganalisa Wajah AI...</p>`;
+            loadingUI.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin text-3xl mb-2 text-brand-400"></i><p class="text-sm font-medium">Menganalisis Wajah AI...</p>`;
 
             const reader = new FileReader();
             reader.onload = async function(e) {
@@ -819,8 +813,11 @@
 
                 imgDisplay.onload = async () => {
                     try {
-                        if (!faceapi.nets.tinyFaceDetector.isLoaded) await faceapi.nets.tinyFaceDetector.loadFromUri('https://cdn.jsdelivr.net/gh/justadudewhohacks/face-api.js@master/weights');
+                        if (!faceapi.nets.tinyFaceDetector.isLoaded) {
+                            await faceapi.nets.tinyFaceDetector.loadFromUri('https://cdn.jsdelivr.net/gh/justadudewhohacks/face-api.js@master/weights');
+                        }
 
+                        // Deteksi wajah sekali jalan (on-demand)
                         const detections = await faceapi.detectAllFaces(imgDisplay, new faceapi.TinyFaceDetectorOptions());
                         const badgeFace = document.getElementById('faceBadge');
 
@@ -830,26 +827,50 @@
                             badgeFace.innerHTML = `<i class="fa-solid fa-face-smile mr-1"></i> Wajah Terdeteksi`;
                             document.getElementById('camera-container').style.borderColor = "#10b981";
                             loadingUI.classList.add('hidden'); 
+
+                            // Kirim otomatis karena wajah valid terdeteksi
+                            prosesAbsen(activeTipe);
                         } else {
                             isFaceDetected = false;
                             badgeFace.className = "text-xs font-bold px-2 py-1 rounded-full bg-red-100 text-red-600";
                             badgeFace.innerHTML = `<i class="fa-solid fa-user-xmark mr-1"></i> Wajah Tidak Ditemukan`;
                             document.getElementById('camera-container').style.borderColor = "#ef4444";
-                            loadingUI.innerHTML = `<div class="bg-black/60 w-full h-full flex flex-col items-center justify-center backdrop-blur-sm"><p class="text-sm text-center px-4 font-medium mb-4 text-white">Wajah kurang jelas.</p><button onclick="document.getElementById('iosCameraInput').click()" class="bg-rose-500 hover:bg-rose-600 text-white text-sm font-bold py-2.5 px-6 rounded-xl shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2"><i class="fa-solid fa-camera-rotate"></i> Foto Ulang</button></div>`;
+                            
+                            loadingUI.innerHTML = `
+                                <div class="bg-black/60 w-full h-full flex flex-col items-center justify-center backdrop-blur-sm">
+                                    <p class="text-sm text-center px-4 font-medium mb-4 text-white">Wajah kurang jelas.</p>
+                                    <button onclick="document.getElementById('iosCameraInput').click()" class="bg-rose-500 hover:bg-rose-600 text-white text-sm font-bold py-2.5 px-6 rounded-xl shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2">
+                                        <i class="fa-solid fa-camera-rotate"></i> Foto Ulang
+                                    </button>
+                                </div>
+                            `;
+
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Wajah tidak terdeteksi!',
+                                text: 'Harap pastikan wajah Anda terlihat jelas di dalam bingkai kamera dan silakan foto ulang.',
+                                confirmButtonColor: '#0ea5e9',
+                                confirmButtonText: 'Coba Lagi'
+                            });
                         }
                         validateAbsenButton();
-                    } catch(err) { console.error(err); loadingUI.innerHTML = `<p class="text-white text-sm">Gagal memproses gambar.</p>`; }
+                    } catch(err) { 
+                        console.error(err); 
+                        loadingUI.innerHTML = `<p class="text-white text-sm">Gagal memproses gambar.</p>`; 
+                    }
                 };
                 imgDisplay.src = fallbackBase64; 
             };
             reader.readAsDataURL(file);
         }
 
+        // ZETTBOT REVISI: Memvalidasi ketersediaan tombol hanya berdasarkan parameter waktu & radius lokasi (Tanpa real-time deteksi wajah AI)
         function validateAbsenButton() {
             if(!systemSettings) return;
 
             const btnM = document.getElementById('btnMasuk');
             const btnP = document.getElementById('btnPulang');
+            const btnC = document.getElementById('btnCapture'); // Dynamic Shutter Button
             
             const now = new Date();
             const h = now.getHours();
@@ -864,60 +885,209 @@
             let isTimeAllowed = (curTotal >= bukaTotal && curTotal < tutupTotal);
 
             if (!isTimeAllowed) {
-                btnM.disabled = true; btnP.disabled = true;
+                btnM.disabled = true; 
+                btnP.disabled = true;
+                if(btnC) btnC.disabled = true;
+                
                 btnM.innerHTML = '<i class="fa-solid fa-clock text-xl"></i><span>Di Luar Jam</span>';
                 btnP.innerHTML = '<i class="fa-solid fa-clock text-xl"></i><span>Di Luar Jam</span>';
+                if(btnC) {
+                    btnC.innerHTML = '<i class="fa-solid fa-clock mr-1"></i> Di Luar Jam Absensi';
+                    btnC.className = "w-full bg-slate-300 text-slate-600 font-bold py-3.5 rounded-xl cursor-not-allowed flex items-center justify-center gap-2 mt-2";
+                }
                 return; 
             }
 
             btnM.innerHTML = '<i class="fa-solid fa-right-to-bracket text-xl"></i><span>Absen Masuk</span>';
             btnP.innerHTML = '<i class="fa-solid fa-right-from-bracket text-xl"></i><span>Absen Pulang</span>';
 
-            let canMasuk = true; let canPulang = true;
+            let canMasuk = true; 
+            let canPulang = true;
 
             if (currentUser && currentUser.statusAbsen) {
-                if (currentUser.statusAbsen.masuk) { canMasuk = false; btnM.innerHTML = '<i class="fa-solid fa-check text-xl"></i><span>Selesai (Masuk)</span>'; }
-                if (!currentUser.statusAbsen.masuk) { canPulang = false; }
-                if (currentUser.statusAbsen.pulang) { canPulang = false; btnP.innerHTML = '<i class="fa-solid fa-check-double text-xl"></i><span>Selesai (Pulang)</span>'; }
+                if (currentUser.statusAbsen.masuk) { 
+                    canMasuk = false; 
+                    btnM.innerHTML = '<i class="fa-solid fa-check text-xl"></i><span>Selesai (Masuk)</span>'; 
+                }
+                if (!currentUser.statusAbsen.masuk) { 
+                    canPulang = false; 
+                }
+                if (currentUser.statusAbsen.pulang) { 
+                    canPulang = false; 
+                    btnP.innerHTML = '<i class="fa-solid fa-check-double text-xl"></i><span>Selesai (Pulang)</span>'; 
+                }
             }
 
-            if(isLocationValid && isFaceDetected) {
-                btnM.disabled = !canMasuk; btnP.disabled = !canPulang;
+            // Ubah keadaan visual tombol rana dan tombol grid berdasarkan validitas GPS
+            if(isLocationValid) {
+                btnM.disabled = !canMasuk; 
+                btnP.disabled = !canPulang;
+                
+                if(btnC) {
+                    btnC.disabled = !(canMasuk || canPulang);
+                    if(canMasuk) {
+                        btnC.innerHTML = '<i class="fa-solid fa-camera mr-2"></i> Ambil Foto & Absen Masuk';
+                        btnC.className = "w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-emerald-500/30 transition-all active:scale-95 flex items-center justify-center gap-2 mt-2";
+                    } else if(canPulang) {
+                        btnC.innerHTML = '<i class="fa-solid fa-camera mr-2"></i> Ambil Foto & Absen Pulang';
+                        btnC.className = "w-full bg-rose-500 hover:bg-rose-600 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-rose-500/30 transition-all active:scale-95 flex items-center justify-center gap-2 mt-2";
+                    } else {
+                        btnC.disabled = true;
+                        btnC.innerHTML = '<i class="fa-solid fa-check-double mr-2"></i> Semua Absen Selesai';
+                        btnC.className = "w-full bg-slate-200 text-slate-500 font-bold py-3.5 rounded-xl cursor-not-allowed flex items-center justify-center gap-2 mt-2";
+                    }
+                }
             } else {
-                btnM.disabled = true; btnP.disabled = true;
+                btnM.disabled = true; 
+                btnP.disabled = true;
+                
+                if(btnC) {
+                    btnC.disabled = true;
+                    btnC.innerHTML = '<i class="fa-solid fa-location-dot mr-2"></i> Luar Radius Sekolah';
+                    btnC.className = "w-full bg-slate-300 text-slate-600 font-bold py-3.5 rounded-xl cursor-not-allowed flex items-center justify-center gap-2 mt-2";
+                }
             }
         }
 
-        function prosesAbsen(tipe) {
-            Swal.fire({ title: `Memproses Absen ${tipe}...`, html: 'Mengunggah foto dan mengamankan data ke sistem server.', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); } });
+        // Helper untuk mendapatkan status tipe absensi yang sedang berjalan
+        function getActiveTipeAbsen() {
+            if(!systemSettings) return null;
+            
+            let canMasuk = true; 
+            let canPulang = true;
 
-            let base64Image = "";
-            const canvas = document.createElement('canvas'); const ctx = canvas.getContext('2d');
-
-            if (fallbackBase64) {
-                const imgDisplay = document.getElementById('fallbackImageDisplay');
-                canvas.width = imgDisplay.naturalWidth; canvas.height = imgDisplay.naturalHeight;
-                ctx.drawImage(imgDisplay, 0, 0, canvas.width, canvas.height); 
-                base64Image = canvas.toDataURL('image/jpeg', 0.6); // Kompresi untuk mempercepat upload
-            } else {
-                const video = document.getElementById('videoElement');
-                canvas.width = video.videoWidth; canvas.height = video.videoHeight; ctx.translate(canvas.width, 0); ctx.scale(-1, 1); 
-                ctx.drawImage(video, 0, 0, canvas.width, canvas.height); 
-                base64Image = canvas.toDataURL('image/jpeg', 0.6); // Kompresi untuk mempercepat upload
+            if (currentUser && currentUser.statusAbsen) {
+                if (currentUser.statusAbsen.masuk) { canMasuk = false; }
+                if (!currentUser.statusAbsen.masuk) { canPulang = false; }
+                if (currentUser.statusAbsen.pulang) { canPulang = false; }
             }
 
-            const payload = {
-                idPegawai: currentUser.idPegawai, tipeAbsen: tipe, lat: currentLat, lng: currentLong,
-                jarak: Math.round(distanceToHome), foto: base64Image, kodeSekolah: currentUser.kodeSekolah, deviceInfo: getDeviceToken() 
-            };
+            if (canMasuk) return 'Masuk';
+            if (canPulang) return 'Pulang';
+            return null;
+        }
 
-            callGAS('submitAbsensi', payload)
-                .then(function(res) {
-                    if(res.status === 'success') {
-                        Swal.fire({ icon: 'success', title: 'Berhasil!', text: res.message, timer: 4000, showConfirmButton: false }).then(() => { logout(); });
-                    } else { Swal.fire({ icon: 'error', title: 'Gagal', text: res.message }); }
-                })
-                .catch(function(err) { Swal.fire({ icon: 'error', title: 'Koneksi Terputus', text: err.message }); }); 
+        // Handler saat tombol Shutter utama diklik secara manual
+        function triggerManualShutter() {
+            const activeTipe = getActiveTipeAbsen();
+            if(!activeTipe) {
+                Swal.fire('Absensi Ditutup', 'Belum masuk jam absen atau Anda telah menyelesaikan absensi hari ini.', 'info');
+                return;
+            }
+            prosesAbsen(activeTipe);
+        }
+
+        // ZETTBOT REVISI: Proses Absen On-Demand (Bekerja menganalisis gambar hanya setelah dipicu manual)
+        async function prosesAbsen(tipe) {
+            if (!isLocationValid) {
+                Swal.fire({ icon: 'warning', title: 'Akses Lokasi Ditolak', text: 'Sistem mendeteksi Anda berada di luar radius lokasi sekolah.' });
+                return;
+            }
+
+            Swal.fire({ 
+                title: `Menganalisis Foto...`, 
+                html: 'Kecerdasan Buatan AI sedang memindai wajah Anda. Tetap hadapkan wajah ke kamera.', 
+                allowOutsideClick: false, 
+                didOpen: () => { Swal.showLoading(); } 
+            });
+
+            let base64Image = "";
+            const canvas = document.createElement('canvas'); 
+            const ctx = canvas.getContext('2d');
+
+            if (fallbackBase64) {
+                base64Image = fallbackBase64;
+            } else {
+                const video = document.getElementById('videoElement');
+                if (!video.videoWidth) {
+                    Swal.fire('Kamera Belum Siap', 'Mohon tunggu hingga live preview kamera termuat sempurna.', 'warning');
+                    return;
+                }
+                // Gambar video frame aktif ke dalam canvas virtual
+                canvas.width = video.videoWidth; 
+                canvas.height = video.videoHeight; 
+                ctx.translate(canvas.width, 0); 
+                ctx.scale(-1, 1); // Cerminkan horizontal agar sesuai dengan pratinjau
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height); 
+                base64Image = canvas.toDataURL('image/jpeg', 0.6); // Kompresi ringkas untuk meminimalkan beban bandwidth upload
+            }
+
+            // Gunakan Image element temporer untuk diproses oleh face-api.js secara on-demand
+            const tempImg = new Image();
+            tempImg.src = base64Image;
+            tempImg.onload = async () => {
+                try {
+                    if (!faceapi.nets.tinyFaceDetector.isLoaded) {
+                        await faceapi.nets.tinyFaceDetector.loadFromUri('https://cdn.jsdelivr.net/gh/justadudewhohacks/face-api.js@master/weights');
+                    }
+
+                    // Pemicu AI Evaluator Wajah
+                    const detections = await faceapi.detectAllFaces(tempImg, new faceapi.TinyFaceDetectorOptions());
+                    const badgeFace = document.getElementById('faceBadge');
+
+                    if(detections.length > 0) {
+                        isFaceDetected = true;
+                        badgeFace.className = "text-xs font-bold px-2 py-1 rounded-full bg-emerald-100 text-emerald-700";
+                        badgeFace.innerHTML = `<i class="fa-solid fa-face-smile mr-1"></i> Wajah Terdeteksi`;
+                        document.getElementById('camera-container').style.borderColor = "#10b981";
+
+                        // Update Status SweetAlert: Lanjut mengunggah data absen
+                        Swal.fire({
+                            title: `Mengunggah Absen ${tipe}...`,
+                            html: 'Wajah tervalidasi! Menghubungkan ke server dan mengunggah berkas absensi.',
+                            allowOutsideClick: false,
+                            didOpen: () => { Swal.showLoading(); }
+                        });
+
+                        const payload = {
+                            idPegawai: currentUser.idPegawai, 
+                            tipeAbsen: tipe, 
+                            lat: currentLat, 
+                            lng: currentLong,
+                            jarak: Math.round(distanceToHome), 
+                            foto: base64Image, 
+                            kodeSekolah: currentUser.kodeSekolah, 
+                            deviceInfo: getDeviceToken() 
+                        };
+
+                        callGAS('submitAbsensi', payload)
+                            .then(function(res) {
+                                if(res.status === 'success') {
+                                    Swal.fire({ 
+                                        icon: 'success', 
+                                        title: 'Absensi Berhasil!', 
+                                        text: res.message, 
+                                        timer: 4000, 
+                                        showConfirmButton: false 
+                                    }).then(() => { 
+                                        logout(); 
+                                    });
+                                } else { 
+                                    Swal.fire({ icon: 'error', title: 'Transaksi Gagal', text: res.message }); 
+                                }
+                            })
+                            .catch(function(err) { 
+                                Swal.fire({ icon: 'error', title: 'Koneksi Terputus', text: err.message }); 
+                            }); 
+                    } else {
+                        isFaceDetected = false;
+                        badgeFace.className = "text-xs font-bold px-2 py-1 rounded-full bg-red-100 text-red-600";
+                        badgeFace.innerHTML = `<i class="fa-solid fa-user-xmark mr-1"></i> Wajah Tidak Ditemukan`;
+                        document.getElementById('camera-container').style.borderColor = "#ef4444";
+
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Wajah tidak terdeteksi!',
+                            text: 'Harap pastikan wajah Anda terlihat jelas di dalam bingkai kamera dan silakan foto ulang.',
+                            confirmButtonColor: '#0ea5e9',
+                            confirmButtonText: 'Foto Ulang'
+                        });
+                    }
+                } catch (err) {
+                    console.error("FaceAPI Error: ", err);
+                    Swal.fire({ icon: 'error', title: 'Gagal Memproses Gambar', text: err.message });
+                }
+            };
         }
 
         function bukaFormIzin() {
