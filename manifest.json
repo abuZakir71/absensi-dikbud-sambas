@@ -1,35 +1,35 @@
 {
-  "name": "Sistem Absensi Enterprise Disdikbud",
-  "short_name": "Absensi",
-  "description": "Aplikasi Absensi Real-Time & Face Detection Dinas Pendidikan dan Kebudayaan Kabupaten Sambas.",
-  "start_url": "index.html",
-  "display": "standalone",
-  "background_color": "#f8fafc",
-  "theme_color": "#0ea5e9",
-  "orientation": "portrait-primary",
-  "icons": [
-    {
-      "src": "https://cdn-icons-png.flaticon.com/512/5969/5969064.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "https://cdn-icons-png.flaticon.com/512/5969/5969064.png",
-      "sizes": "512x512",
-      "type": "image/png"
-    }
-  ],
-  "shortcuts": [
-    {
-      "name": "Absen Masuk",
-      "url": "index.html?action=masuk",
-      "icons": [{"src": "https://cdn-icons-png.flaticon.com/512/5969/5969064.png", "sizes": "192x192"}]
-    },
-    {
-      "name": "Formulir Izin",
-      "url": "index.html?action=izin",
-      "icons": [{"src": "https://cdn-icons-png.flaticon.com/512/5969/5969064.png", "sizes": "192x192"}]
-    }
-  ]
+"name": "Sistem Absensi Enterprise Disdikbud",
+"short_name": "Absensi",
+"description": "Aplikasi Absensi Real-Time & Face Detection Dinas Pendidikan dan Kebudayaan Kabupaten Sambas.",
+"start_url": "index.html",
+"display": "standalone",
+"background_color": "#f8fafc",
+"theme_color": "#0ea5e9",
+"orientation": "portrait-primary",
+"icons": [
+{
+"src": "https://cdn-icons-png.flaticon.com/512/5969/5969064.png",
+"sizes": "192x192",
+"type": "image/png",
+"purpose": "any maskable"
+},
+{
+"src": "https://cdn-icons-png.flaticon.com/512/5969/5969064.png",
+"sizes": "512x512",
+"type": "image/png"
+}
+],
+"shortcuts": [
+{
+"name": "Absen Masuk",
+"url": "index.html?action=masuk",
+"icons": [{"src": "https://cdn-icons-png.flaticon.com/512/5969/5969064.png", "sizes": "192x192"}]
+},
+{
+"name": "Formulir Izin",
+"url": "index.html?action=izin",
+"icons": [{"src": "https://cdn-icons-png.flaticon.com/512/5969/5969064.png", "sizes": "192x192"}]
+}
+]
 }
