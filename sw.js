@@ -13,10 +13,10 @@ const ASSETS_TO_CACHE = [
   'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css',
   'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js',
   'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css',
-  'https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js'
+  'https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js',
+  'https://cdn-icons-png.flaticon.com/512/854/854878.png'
 ];
 
-// Tahap Install: Simpan aset statis dasar ke dalam cache HP
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
@@ -26,7 +26,6 @@ self.addEventListener('install', (event) => {
   );
 });
 
-// Tahap Aktifasi: Hapus cache lama jika ada update versi aplikasi terbaru
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((cacheNames) => {
@@ -42,17 +41,15 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// Strategi Intersepsi Request (Cache First, kemudian Network Fallback)
 self.addEventListener('fetch', (event) => {
-  // Hanya intercept request GET (mengabaikan POST ke API Google Apps Script)
   if (event.request.method !== 'GET') return;
 
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
       if (cachedResponse) {
-        return cachedResponse; // Load instant dari cache HP
+        return cachedResponse; 
       }
-      return fetch(event.request); // Ambil dari internet jika belum di-cache
+      return fetch(event.request); 
     })
   );
 });
