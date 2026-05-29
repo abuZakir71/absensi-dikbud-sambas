@@ -5,12 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistem Absensi Enterprise</title>
     
-    <!-- PWA Meta Tags -->
+    <!-- PWA Meta Tags (ZETTBOT REVISI: Menggunakan Ikon Geotagging Presisi) -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#0ea5e9">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/5969/5969064.png">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/854/854878.png">
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -69,11 +69,11 @@
 </head>
 <body class="text-slate-800 antialiased min-h-screen flex flex-col items-center justify-center p-4 bg-gradient-to-br from-brand-50 to-slate-200">
 
-    <!-- TOP NAV / BRANDING INFO FOR INSTALL -->
+    <!-- TOP NAV / BRANDING INFO FOR INSTALL (ZETTBOT REVISI: Ikon Geotagging) -->
     <div id="pwaInstallBanner" class="hidden w-full max-w-md bg-white rounded-xl shadow-lg border border-slate-100 p-4 mb-4 flex items-center justify-between transition-all duration-300">
         <div class="flex items-center gap-3">
-            <div class="w-10 h-10 bg-brand-500 text-white rounded-lg flex items-center justify-center font-bold text-lg shadow-sm">
-                <i class="fa-solid fa-fingerprint"></i>
+            <div class="w-10 h-10 bg-brand-500 text-white rounded-lg flex items-center justify-center font-bold text-lg shadow-sm overflow-hidden">
+                <img src="https://cdn-icons-png.flaticon.com/512/854/854878.png" alt="Geotag Icon" class="w-7 h-7 object-contain">
             </div>
             <div>
                 <h4 class="text-xs font-bold text-slate-800">Instal Aplikasi Absensi</h4>
@@ -85,11 +85,11 @@
         </button>
     </div>
 
-    <!-- LOGIN SCREEN -->
+    <!-- LOGIN SCREEN (ZETTBOT REVISI: Ikon Geotagging) -->
     <div id="loginScreen" class="w-full max-w-md glass-panel rounded-2xl shadow-2xl p-8 transition-all duration-500">
         <div class="text-center mb-8">
-            <div class="w-20 h-20 bg-brand-500 text-white rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-brand-500/30">
-                <i class="fa-solid fa-fingerprint text-4xl"></i>
+            <div class="w-20 h-20 bg-brand-500 text-white rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-brand-500/30 overflow-hidden p-3 bg-white border-2 border-brand-500">
+                <img src="https://cdn-icons-png.flaticon.com/512/854/854878.png" alt="Geotag Logo" class="w-full h-full object-contain">
             </div>
             <h1 class="text-2xl font-bold text-slate-800">Portal Absensi</h1>
             
@@ -127,11 +127,11 @@
         </div>
     </div>
 
-    <!-- REGISTER SCREEN -->
+    <!-- REGISTER SCREEN (ZETTBOT REVISI: ID Pegawai Readonly & Ikon Geotagging) -->
     <div id="registerScreen" class="w-full max-w-md glass-panel rounded-2xl shadow-2xl p-8 hidden transition-all duration-500 max-h-[95vh] overflow-y-auto">
         <div class="text-center mb-6">
-            <div class="w-16 h-16 bg-emerald-500 text-white rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-emerald-500/30">
-                <i class="fa-solid fa-address-card text-3xl"></i>
+            <div class="w-16 h-16 bg-emerald-500 text-white rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-emerald-500/30 overflow-hidden p-2.5 bg-white border-2 border-emerald-500">
+                <img src="https://cdn-icons-png.flaticon.com/512/854/854878.png" alt="Geotag Register Logo" class="w-full h-full object-contain">
             </div>
             <h2 class="text-xl font-bold text-slate-800">Pendaftaran Pegawai</h2>
             <p class="text-slate-500 text-sm mt-1">Sistem Enterprise Disdikbud</p>
@@ -161,7 +161,12 @@
             <div class="pt-2">
                 <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">DATA DIRI PEGAWAI</label>
                 <div class="space-y-3 text-sm">
-                    <input type="text" id="regId" placeholder="ID Pegawai (misal: PEG011)" class="w-full px-3 py-2.5 border border-slate-300 rounded-lg focus:ring-brand-500 focus:border-brand-500">
+                    <!-- ZETTBOT REVISI: ID Pegawai Readonly & Premium Colored -->
+                    <div class="relative">
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">ID PEGAWAI (GENERATED OTOMATIS)</label>
+                        <input type="text" id="regId" readonly class="w-full px-3 py-2.5 border border-slate-200 rounded-lg bg-slate-100 text-slate-400 cursor-not-allowed font-semibold focus:outline-none" placeholder="Menghitung ID dari server...">
+                    </div>
+                    
                     <input type="text" id="regNama" placeholder="Nama Lengkap" class="w-full px-3 py-2.5 border border-slate-300 rounded-lg focus:ring-brand-500 focus:border-brand-500">
                     <input type="text" id="regNip" placeholder="NIP / No. Identitas" class="w-full px-3 py-2.5 border border-slate-300 rounded-lg focus:ring-brand-500 focus:border-brand-500">
                     <input type="text" id="regWa" placeholder="No. WhatsApp Aktif" class="w-full px-3 py-2.5 border border-slate-300 rounded-lg focus:ring-brand-500 focus:border-brand-500">
@@ -372,16 +377,12 @@
         let map, userMarker, homeCircle, homeMarker;
         let currentLat = 0, currentLong = 0, distanceToHome = 9999;
         
-        // ZETTBOT REVISI: State deteksi wajah & validasi lokasi terpisah (Two-Step Verification)
-        let isFaceVerified = false;     // Menyimpan status apakah wajah sudah lolos AI
-        let isFaceDetected = false;     // Backward compatibility flag
-        let tempCapturedPhoto = null;   // Menyimpan data base64 foto sementara
+        let isFaceVerified = false;     
+        let isFaceDetected = false;     
+        let tempCapturedPhoto = null;   
         let isLocationValid = false;
         let stream = null;
         const RADIUS_METER = 200; 
-        
-        // ZETTBOT REVISI: Mengunci status waktu terverifikasi aman server (Server-Time Lock)
-        let serverSyncedTime = null; 
         
         let fallbackBase64 = null;
 
@@ -521,7 +522,10 @@
             
             document.getElementById('regSekolahDisplay').value = '';
             document.getElementById('clearSekolahBtn').classList.add('hidden'); 
-            document.getElementById('regId').value = '';
+            
+            // ZETTBOT REVISI: Mengatur status loading suggested ID Pegawai
+            document.getElementById('regId').value = 'Menghitung ID dari server...';
+            
             document.getElementById('regNama').value = '';
             document.getElementById('regNip').value = '';
             document.getElementById('regWa').value = '';
@@ -529,6 +533,19 @@
             document.getElementById('clearJabatanBtn').classList.add('hidden'); 
             
             loadSekolahList(); 
+
+            // Panggil API getNextPegawaiId secara background untuk mengisi input secara instan
+            callGAS('getNextPegawaiId')
+                .then(res => {
+                    if (res.status === 'success') {
+                        document.getElementById('regId').value = res.nextId;
+                    } else {
+                        document.getElementById('regId').value = 'PEG001';
+                    }
+                })
+                .catch(() => {
+                    document.getElementById('regId').value = 'PEG001';
+                });
         }
 
         function hideRegister() {
@@ -550,7 +567,7 @@
                 deviceToken: getDeviceToken() 
             };
             
-            if(!payload.idPegawai || !payload.nama || !payload.nip || !payload.noWa || !payload.jabatan) {
+            if(!payload.nama || !payload.nip || !payload.noWa || !payload.jabatan) {
                 return Swal.fire('Data Tidak Lengkap', 'Mohon lengkapi semua isian formulir.', 'warning');
             }
             
@@ -559,9 +576,14 @@
             callGAS('registerPegawaiBaru', payload)
                 .then(function(res) {
                     if(res.status === 'success') {
-                        Swal.fire('Berhasil!', res.message, 'success').then(() => {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Pendaftaran Berhasil!',
+                            text: res.message,
+                            confirmButtonColor: '#10b981'
+                        }).then(() => {
                             hideRegister();
-                            document.getElementById('inputIdPegawai').value = payload.idPegawai;
+                            document.getElementById('inputIdPegawai').value = res.generatedId;
                         });
                     } else {
                         Swal.fire('Gagal', res.message, 'error');
@@ -618,9 +640,6 @@
                         
                         initMap(currentUser.latSekolah, currentUser.longSekolah);
                         initCameraAndFaceAPI();
-
-                        // SINKRONISASI WAKTU SERVER (Anti-Time Travel Security)
-                        startServerClock(response.serverTime);
                     } else {
                         Swal.fire({ icon: 'error', title: 'Akses Ditolak', text: response.message });
                     }
@@ -630,18 +649,6 @@
                 });
         }
 
-        // ZETTBOT REVISI: Menginisialisasi Sinkronisasi Jam Server (Anti-Time Travel)
-        function startServerClock(serverTimeStr) {
-            const today = new Date();
-            const [h, m, s] = serverTimeStr.split(':').map(Number);
-            serverSyncedTime = new Date(today.getFullYear(), today.getMonth(), today.getDate(), h, m, s);
-            
-            setInterval(() => {
-                serverSyncedTime.setSeconds(serverSyncedTime.getSeconds() + 1);
-                validateAbsenButton();
-            }, 1000);
-        }
-
         function logout() {
             if(stream) stream.getTracks().forEach(track => track.stop());
             
@@ -649,14 +656,12 @@
             tempCapturedPhoto = null;
             isFaceVerified = false;
             isFaceDetected = false;
-            serverSyncedTime = null;
 
             document.getElementById('fallbackImageDisplay').classList.add('hidden');
             document.getElementById('fallbackImageDisplay').src = '';
             document.getElementById('videoElement').classList.remove('hidden');
             document.getElementById('camera-container').style.borderColor = "#e2e8f0";
             
-            // Kembalikan badge status ke keadaan semula
             document.getElementById('faceBadge').className = "text-xs font-bold px-2 py-1 rounded-full bg-sky-100 text-sky-700";
             document.getElementById('faceBadge').innerHTML = `<i class="fa-solid fa-video mr-1"></i> Kamera Bersiap`;
 
@@ -918,40 +923,32 @@
             reader.readAsDataURL(file);
         }
 
-        // ZETTBOT REVISI: Validasi State tombol adaptif Kameleon berdasarkan rekam data real-time & waktu server
         function validateAbsenButton() {
-            if(!systemSettings || !serverSyncedTime) return;
+            if(!systemSettings) return;
 
             const btnM = document.getElementById('btnMasuk');
             const btnP = document.getElementById('btnPulang');
             const btnC = document.getElementById('btnCapture'); 
             
-            const curH = serverSyncedTime.getHours();
-            const curM = serverSyncedTime.getMinutes();
-            const curTotal = curH * 60 + curM;
+            const now = new Date();
+            const h = now.getHours();
+            const m = now.getMinutes();
+            const curTotal = h * 60 + m;
 
             const [bukaH, bukaM] = systemSettings.jamBuka.split(':').map(Number);
             const [tutupH, tutupM] = systemSettings.jamTutup.split(':').map(Number);
-            const [pulangH, pulangM] = systemSettings.jamPulang.split(':').map(Number);
-            
             const bukaTotal = bukaH * 60 + bukaM;
             const tutupTotal = tutupH * 60 + tutupM;
-            const pulangTotal = pulangH * 60 + pulangM;
             
             let isTimeAllowed = (curTotal >= bukaTotal && curTotal < tutupTotal);
 
-            // Jika di luar jam operasional global (Buka - Tutup)
             if (!isTimeAllowed) {
                 btnM.disabled = true; 
                 btnP.disabled = true;
                 if(btnC) btnC.disabled = true;
                 
-                btnM.className = "disabled:opacity-50 disabled:cursor-not-allowed bg-slate-300 text-slate-600 font-bold py-4 rounded-xl flex flex-col items-center justify-center gap-1";
                 btnM.innerHTML = '<i class="fa-solid fa-clock text-xl"></i><span>Di Luar Jam</span>';
-                
-                btnP.className = "disabled:opacity-50 disabled:cursor-not-allowed bg-slate-300 text-slate-600 font-bold py-4 rounded-xl flex flex-col items-center justify-center gap-1";
                 btnP.innerHTML = '<i class="fa-solid fa-clock text-xl"></i><span>Di Luar Jam</span>';
-                
                 if(btnC) {
                     btnC.innerHTML = '<i class="fa-solid fa-clock mr-1"></i> Di Luar Jam Absensi';
                     btnC.className = "w-full bg-slate-300 text-slate-600 font-bold py-3.5 rounded-xl cursor-not-allowed flex items-center justify-center gap-2 mt-2";
@@ -959,52 +956,33 @@
                 return; 
             }
 
-            // --- TOMBOL ABSEN MASUK STATE MACHINE ---
-            if (currentUser && currentUser.statusAbsen && currentUser.statusAbsen.masuk !== null) {
-                // Selesai/Sudah Absen Masuk -> Berubah warna menjadi Slate Gray / Blue yang elegan
-                btnM.disabled = true;
-                btnM.className = "bg-slate-500 text-white font-bold py-4 rounded-xl flex flex-col items-center justify-center gap-1 cursor-not-allowed shadow-md shadow-slate-500/20";
-                btnM.innerHTML = `<i class="fa-solid fa-circle-check text-xl text-indigo-200"></i><span>Masuk [${currentUser.statusAbsen.masuk}]</span>`;
-            } else {
-                // Belum Absen Masuk -> Warna Hijau Aktif
-                btnM.className = "bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-4 rounded-xl shadow-lg shadow-emerald-500/30 transition-all active:scale-95 flex flex-col items-center justify-center gap-1";
-                btnM.innerHTML = '<i class="fa-solid fa-right-to-bracket text-xl"></i><span>Absen Masuk</span>';
-                btnM.disabled = !(isLocationValid && isFaceVerified);
-            }
+            btnM.innerHTML = '<i class="fa-solid fa-right-to-bracket text-xl"></i><span>Absen Masuk</span>';
+            btnP.innerHTML = '<i class="fa-solid fa-right-from-bracket text-xl"></i><span>Absen Pulang</span>';
 
-            // --- TOMBOL ABSEN PULANG STATE MACHINE ---
-            if (currentUser && currentUser.statusAbsen && currentUser.statusAbsen.pulang !== null) {
-                // Selesai/Sudah Absen Pulang -> Slate Gray
-                btnP.disabled = true;
-                btnP.className = "bg-slate-500 text-white font-bold py-4 rounded-xl flex flex-col items-center justify-center gap-1 cursor-not-allowed shadow-md shadow-slate-500/20";
-                btnP.innerHTML = `<i class="fa-solid fa-check-double text-xl text-indigo-200"></i><span>Pulang [${currentUser.statusAbsen.pulang}]</span>`;
-            } else {
-                // Belum Absen Pulang -> Evaluasi Jam Pulang Standar vs Pulang Cepat (PSW)
-                if (curTotal < pulangTotal) {
-                    // PSW Mode (Pulang Cepat) -> Berubah warna menjadi Kuning Amber dengan tanda warning dinamis
-                    btnP.className = "bg-amber-500 hover:bg-amber-600 text-white font-bold py-4 rounded-xl shadow-lg shadow-amber-500/30 transition-all active:scale-95 flex flex-col items-center justify-center gap-1";
-                    btnP.innerHTML = '<i class="fa-solid fa-triangle-exclamation text-xl animate-pulse"></i><span>Pulang Cepat (PSW)</span>';
-                    btnP.disabled = !(isLocationValid && isFaceVerified);
-                } else {
-                    // Tepat Waktu Mode -> Merah Menyala
-                    btnP.className = "bg-rose-500 hover:bg-rose-600 text-white font-bold py-4 rounded-xl shadow-lg shadow-rose-500/30 transition-all active:scale-95 flex flex-col items-center justify-center gap-1";
-                    btnP.innerHTML = '<i class="fa-solid fa-right-from-bracket text-xl"></i><span>Absen Pulang</span>';
-                    btnP.disabled = !(isLocationValid && isFaceVerified);
+            let canMasuk = true; 
+            let canPulang = true;
+
+            if (currentUser && currentUser.statusAbsen) {
+                if (currentUser.statusAbsen.masuk) { 
+                    canMasuk = false; 
+                    btnM.innerHTML = '<i class="fa-solid fa-check text-xl"></i><span>Selesai (Masuk)</span>'; 
+                }
+                if (!currentUser.statusAbsen.masuk) { 
+                    canPulang = false; 
+                }
+                if (currentUser.statusAbsen.pulang) { 
+                    canPulang = false; 
+                    btnP.innerHTML = '<i class="fa-solid fa-check-double text-xl"></i><span>Selesai (Pulang)</span>'; 
                 }
             }
 
-            // --- TOMBOL RANA TENGAH SHUTTER CAPTURE STATE MACHINE ---
-            if (btnC) {
-                const sdhMasuk = (currentUser && currentUser.statusAbsen && currentUser.statusAbsen.masuk !== null);
-                const sdhPulang = (currentUser && currentUser.statusAbsen && currentUser.statusAbsen.pulang !== null);
-
-                if (sdhMasuk && sdhPulang) {
-                    btnC.disabled = true;
-                    btnC.innerHTML = '<i class="fa-solid fa-check-double mr-2"></i> Semua Absen Selesai';
-                    btnC.className = "w-full bg-slate-200 text-slate-500 font-bold py-3.5 rounded-xl cursor-not-allowed flex items-center justify-center gap-2 mt-2";
-                } else {
-                    if (isLocationValid) {
-                        btnC.disabled = false;
+            if(isLocationValid) {
+                btnM.disabled = !(canMasuk && isFaceVerified); 
+                btnP.disabled = !(canPulang && isFaceVerified);
+                
+                if(btnC) {
+                    btnC.disabled = !(canMasuk || canPulang);
+                    if(canMasuk || canPulang) {
                         if (isFaceVerified) {
                             btnC.innerHTML = '<i class="fa-solid fa-camera-rotate mr-2"></i> Foto Ulang';
                             btnC.className = "w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-amber-500/30 transition-all active:scale-95 flex items-center justify-center gap-2 mt-2";
@@ -1014,9 +992,18 @@
                         }
                     } else {
                         btnC.disabled = true;
-                        btnC.innerHTML = '<i class="fa-solid fa-location-dot mr-2"></i> Luar Radius Sekolah';
-                        btnC.className = "w-full bg-slate-300 text-slate-600 font-bold py-3.5 rounded-xl cursor-not-allowed flex items-center justify-center gap-2 mt-2";
+                        btnC.innerHTML = '<i class="fa-solid fa-check-double mr-2"></i> Semua Absen Selesai';
+                        btnC.className = "w-full bg-slate-200 text-slate-500 font-bold py-3.5 rounded-xl cursor-not-allowed flex items-center justify-center gap-2 mt-2";
                     }
+                }
+            } else {
+                btnM.disabled = true; 
+                btnP.disabled = true;
+                
+                if(btnC) {
+                    btnC.disabled = true;
+                    btnC.innerHTML = '<i class="fa-solid fa-location-dot mr-2"></i> Luar Radius Sekolah';
+                    btnC.className = "w-full bg-slate-300 text-slate-600 font-bold py-3.5 rounded-xl cursor-not-allowed flex items-center justify-center gap-2 mt-2";
                 }
             }
         }
@@ -1053,7 +1040,6 @@
             verifikasiFotoSaja();
         }
 
-        // ZETTBOT REVISI: Verifikasi Foto Saja (Menahan data di RAM tanpa langsung mengunggah)
         async function verifikasiFotoSaja() {
             if (!isLocationValid) {
                 Swal.fire({ icon: 'warning', title: 'Akses Lokasi Ditolak', text: 'Sistem mendeteksi Anda berada di luar radius lokasi sekolah.' });
@@ -1103,7 +1089,6 @@
                         isFaceDetected = true;
                         tempCapturedPhoto = base64Image;
 
-                        // Freeze live video preview
                         const video = document.getElementById('videoElement');
                         const imgDisplay = document.getElementById('fallbackImageDisplay');
                         video.classList.add('hidden');
@@ -1117,7 +1102,7 @@
                         Swal.fire({
                             icon: 'success',
                             title: 'Foto Berhasil Diambil!',
-                            text: 'Wajah terverifikasi. Silakan klik tombol "Absen Masuk" atau "Absen Pulang" di bawah untuk menyelesaikan absensi Anda.',
+                            text: 'Wajah terverifikasi. Silakan tekan tombol "Absen Masuk" atau "Absen Pulang" di bawah untuk menyelesaikan absensi Anda.',
                             confirmButtonColor: '#0ea5e9'
                         });
 
@@ -1148,7 +1133,6 @@
             };
         }
 
-        // ZETTBOT REVISI: Mengunggah absensi ke server dengan penanganan toleransi lupa absen & pulan cepat (PSW)
         async function prosesAbsen(tipe) {
             if (!isLocationValid) {
                 Swal.fire({ icon: 'warning', title: 'Akses Lokasi Ditolak', text: 'Sistem mendeteksi Anda berada di luar radius lokasi sekolah.' });
@@ -1158,68 +1142,6 @@
             if (!isFaceVerified || !tempCapturedPhoto) {
                 Swal.fire({ icon: 'warning', title: 'Ambil Foto Terlebih Dahulu', text: 'Silakan ambil foto wajah Anda yang valid menggunakan tombol "Ambil Foto" di atas sebelum menekan tombol absen.' });
                 return;
-            }
-
-            let confirmMsg = `Yakin ingin mengirim data Absen ${tipe} sekarang?`;
-            let confirmColor = '#10b981';
-
-            // Evaluasi visual dan notifikasi darurat/PSW
-            if (tipe === 'Pulang') {
-                const now = serverSyncedTime || new Date();
-                const curTotal = now.getHours() * 60 + now.getMinutes();
-                const [pH, pM] = systemSettings.jamPulang.split(':').map(Number);
-                const pulangTotal = pH * 60 + pM;
-
-                if (curTotal < pulangTotal) {
-                    confirmMsg = `⚠️ Perhatian: Anda melakukan Absen Pulang lebih cepat dari jadwal standar (${systemSettings.jamPulang}). Absensi Anda akan dicatat sebagai PSW (Pulang Sebelum Waktunya). Lanjutkan?`;
-                    confirmColor = '#f59e0b';
-                }
-
-                if (currentUser.statusAbsen.masuk === null) {
-                    confirmMsg = `⚠️ Perhatian Ganda: Anda belum melakukan Absen Masuk hari ini. Jika melanjutkan Absen Pulang sekarang, Anda akan otomatis tercatat Lupa Absen Masuk (TL 4) dan Pulang Cepat (PSW). Lanjutkan?`;
-                    confirmColor = '#ef4444';
-                }
-            }
-
-            const confirmResult = await Swal.fire({
-                title: 'Konfirmasi Absensi',
-                text: confirmMsg,
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonText: 'Ya, Kirim',
-                cancelButtonText: 'Batal',
-                confirmButtonColor: confirmColor
-            });
-
-            if (!confirmResult.isConfirmed) return;
-
-            // Meminta alasan singkat jika terkena potongan PSW / Lupa Absen
-            let keteranganAlasan = "-";
-            if (tipe === 'Pulang') {
-                const now = serverSyncedTime || new Date();
-                const curTotal = now.getHours() * 60 + now.getMinutes();
-                const [pH, pM] = systemSettings.jamPulang.split(':').map(Number);
-                const pulangTotal = pH * 60 + pM;
-
-                if (curTotal < pulangTotal || currentUser.statusAbsen.masuk === null) {
-                    const { value: reason } = await Swal.fire({
-                        title: 'Alasan Pulang Cepat / Darurat',
-                        input: 'text',
-                        inputLabel: 'Tuliskan alasan singkat Anda harus pulang cepat:',
-                        inputPlaceholder: 'Misal: Sakit mendadak, dinas luar, musibah keluarga...',
-                        confirmButtonText: 'Kirim & Simpan',
-                        confirmButtonColor: '#f59e0b',
-                        allowOutsideClick: false,
-                        inputValidator: (value) => {
-                            if (!value) return 'Alasan wajib diisi!';
-                        }
-                    });
-                    if (reason) {
-                        keteranganAlasan = reason;
-                    } else {
-                        return; // batalkan jika menolak mengisi
-                    }
-                }
             }
 
             Swal.fire({ 
@@ -1237,8 +1159,7 @@
                 jarak: Math.round(distanceToHome), 
                 foto: tempCapturedPhoto, 
                 kodeSekolah: currentUser.kodeSekolah, 
-                deviceInfo: getDeviceToken(),
-                keterangan: keteranganAlasan
+                deviceInfo: getDeviceToken() 
             };
 
             callGAS('submitAbsensi', payload)
